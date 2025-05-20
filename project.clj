@@ -28,6 +28,11 @@
         :url "https://github.com/mschaef/asphales.git"}
   :license {:name "The Apache Software License, Version 2.0"
             :url "http://www.apache.org/licenses/LICENSE-2.0"}
+
+  :profiles {:dev
+             {:main asphales.core
+              :aot [asphales.core]}}
+
   :dependencies [[org.clojure/clojure "1.12.0"]]
   :repl-options {:init-ns asphales.core}
 

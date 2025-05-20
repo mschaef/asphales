@@ -1,6 +1,53 @@
 (ns asphales.core)
 
-(defn foo
+(defprotocol Encodable
+  "Protocol for encoding values in normalized form for storage."
+  (encode-value [value]))
+
+(defn- encode-simple [value]
+  (pr value))
+
+(defn- encode-sequence [value begin end]
+  (print begin)
+  (reduce (fn [needs-space? v]
+            (when needs-space?
+              (print " "))
+            (encode-value v)
+            true)
+          false value)
+  (print end))
+
+(extend-protocol Encodable
+  nil
+  (encode-value [value]
+    (encode-simple value))
+
+  java.lang.String
+  (encode-value [value]
+    (encode-simple value))
+
+  java.lang.Long
+  (encode-value [value]
+    (encode-simple value))
+
+  clojure.lang.PersistentVector
+  (encode-value [value]
+    (encode-sequence value "[" "]"))
+
+  clojure.lang.PersistentList$EmptyList
+  (encode-value [value]
+    (encode-sequence value "(" ")"))
+
+  clojure.lang.PersistentList
+  (encode-value [value]
+    (encode-sequence value "(" ")")))
+
+(defn encode [value]
+  (with-out-str
+    (encode-value value)))
+
+(defn -main
   "I don't do a whole lot."
-  [x]
-  (println x "Hello, World!"))
+  []
+  (doseq [x [nil 1 "hello" [] [1] [1 2 3] () '(1 2 3)]]
+    (println (str x " -> " (encode x)))))

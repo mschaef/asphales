@@ -4,8 +4,8 @@
 
 
 .PHONY: run
-run: check-format                              ## Run the application in backup mode
-	lein run backup
+run:                                           ## Run the application
+	lein run
 
 .PHONY: check-format
 check-format:
