@@ -34,6 +34,14 @@
   (encode-value [value]
     (encode-simple value))
 
+  java.math.BigDecimal
+  (encode-value [value]
+    (encode-simple value))
+
+  clojure.lang.BigInt
+  (encode-value [value]
+    (encode-simple value))
+
   java.lang.Boolean
   (encode-value [value]
     (encode-simple value))
@@ -42,7 +50,7 @@
   (encode-value [value]
     (encode-simple value))
 
-  java.lang.String
+  java.util.Date
   (encode-value [value]
     (encode-simple value))
 
@@ -50,15 +58,11 @@
   (encode-value [value]
     (encode-simple value))
 
-  clojure.lang.BigInt
-  (encode-value [value]
-    (encode-simple value))
-
-  java.math.BigDecimal
-  (encode-value [value]
-    (encode-simple value))
-
   java.lang.Long
+  (encode-value [value]
+    (encode-simple value))
+
+  java.lang.String
   (encode-value [value]
     (encode-simple value))
 

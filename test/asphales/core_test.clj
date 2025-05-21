@@ -51,7 +51,11 @@
     (is (= "\"\\n\\r\"" (encode "\n\r"))))
 
   (testing "Encode keyword values"
-    (is (= ":x" (encode :x)))))
+    (is (= ":x" (encode :x))))
+
+  (testing "Encode date values"
+    (is (= "#inst \"2022-02-14T11:20:00.123-00:00\""
+           (encode #inst "2022-02-14T11:20:00.123-00:00")))))
 
 (deftest sequence-encoding
   (testing "Encode Vectors"
