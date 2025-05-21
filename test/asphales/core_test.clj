@@ -51,7 +51,9 @@
     (is (= "\"\\n\\r\"" (encode "\n\r"))))
 
   (testing "Encode keyword values"
-    (is (= ":x" (encode :x))))
+    (is (= ":x" (encode :x)))
+    ;; Keywords with explicit namespaces are not allowed
+    (is (thrown? RuntimeException (encode ::x))))
 
   (testing "Encode date values"
     (is (= "#inst \"2022-02-14T11:20:00.123-00:00\""
@@ -78,7 +80,13 @@
     (is (= "#{1 2 3}" (encode #{3 2 1})))
     (is (= "#{1 2 3 10}" (encode #{1 2 3 10})))
     (is (= "#{1 2 3 10}" (encode #{3 2 1 10})))
-    (is (= "#{\"a\" \"b\" \"c\"}" (encode #{"c" "b" "a"}))))
+    (is (= "#{\"a\" \"b\" \"c\"}" (encode #{"c" "b" "a"})))
+
+    ;; Elements to be ordered must be comparable with each other
+    (is (thrown? RuntimeException (encode #{"a" 1})))
+
+    ;; Elements to be ordered must be comparable at all
+    (is (thrown? RuntimeException (encode #{'(1) '(2)}))))
 
   (testing "Encode Maps"
     (is (= "{}" (encode {})))
