@@ -33,7 +33,9 @@
              {:main asphales.core
               :aot [asphales.core]}}
 
-  :dependencies [[org.clojure/clojure "1.12.0"]]
+  :dependencies [[org.clojure/clojure "1.12.0"]
+                 [org.clj-commons/digest "1.4.100"]]
+
   :repl-options {:init-ns asphales.core}
 
   :plugins [[dev.weavejester/lein-cljfmt "0.13.0"]]
