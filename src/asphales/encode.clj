@@ -1,5 +1,14 @@
-(ns asphales.encode)
+(ns asphales.encode
+  (:require [clojure.edn :as edn]))
 
+
+(deftype Token [digest])
+
+(defn token [digest]
+  (Token. digest))
+
+(defn token-digest [token]
+  (.digest token))
 
 (defprotocol Encodable
   "Protocol for encoding values in normalized form for storage."
@@ -99,8 +108,21 @@
 
   clojure.lang.PersistentArrayMap
   (encode-value [value]
-    (encode-map value)))
+    (encode-map value))
+
+  Token
+  (encode-value [value]
+    (print "#token ")
+    (pr (token-digest value))))
 
 (defn encode [value]
   (with-out-str
     (encode-value value)))
+
+(defn encode-binary [value]
+  (.getBytes (encode value) "UTF-8"))
+
+(defn decode-binary [bytes]
+  (edn/read-string {:readers {'token token}}
+                   (String. bytes "UTF-8")))
+
