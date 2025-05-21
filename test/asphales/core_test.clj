@@ -7,4 +7,4 @@
     (let [store (memory-storage)
           digest (put-data store {:x 3 :y 4})]
       (is (= {:x 3 :y 4} (get-data store digest)))
-      (is (= nil (get-data store "missing-or-invalid-digest"))))))
+      (is (= nil (get-data store (token "missing-or-invalid-digest")))))))
