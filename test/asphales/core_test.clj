@@ -48,7 +48,10 @@
     (is (= "\"\\n\"" (encode "\n")))
     (is (= "\"\\r\"" (encode "\r")))
     (is (= "\"\\r\\n\"" (encode "\r\n")))
-    (is (= "\"\\n\\r\"" (encode "\n\r")))))
+    (is (= "\"\\n\\r\"" (encode "\n\r"))))
+
+  (testing "Encode keyword values"
+    (is (= ":x" (encode :x)))))
 
 (deftest sequence-encoding
   (testing "Encode Vectors"
@@ -62,3 +65,25 @@
     (is (= "(1)" (encode '(1))))
     (is (= "(1 2 3)" (encode '(1 2 3))))
     (is (= "((1) (2) (3))" (encode '((1) (2) (3)))))))
+
+(deftest unordered-encoding
+  (testing "Encode Sets"
+    (is (= "#{}" (encode #{})))
+    (is (= "#{1}" (encode #{1})))
+    (is (= "#{1 2 3}" (encode #{1 2 3})))
+    (is (= "#{1 2 3}" (encode #{3 2 1})))
+    (is (= "#{1 2 3 10}" (encode #{1 2 3 10})))
+    (is (= "#{1 2 3 10}" (encode #{3 2 1 10})))
+    (is (= "#{\"a\" \"b\" \"c\"}" (encode #{"c" "b" "a"}))))
+
+  (testing "Encode Maps"
+    (is (= "{}" (encode {})))
+    (is (= "{:x 3 :y 4}" (encode {:x 3 :y 4})))
+    (is (= "{:x 3 :y 4}" (encode {:y 4 :x 3})))
+    (is (= "{:length 5 :x 3 :y 4}" (encode {:y 4 :x 3 :length 5}))))
+
+  (testing "Encode Nested Maps and Sets"
+    (is (= "{:desc \"Point\" :point {:x 3 :y 4}}"
+           (encode {:point {:x 3 :y 4} :desc "Point"})))
+    (is (= "{:observers #{:alice :bob} :x 3 :y 4}"
+           (encode {:y 4 :x 3 :observers #{:alice :bob}})))))

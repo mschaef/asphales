@@ -7,15 +7,27 @@
 (defn- encode-simple [value]
   (pr value))
 
-(defn- encode-sequence [value begin end]
+(defn- encode-sequence [values begin end]
   (print begin)
   (reduce (fn [needs-space? v]
             (when needs-space?
               (print " "))
             (encode-value v)
             true)
-          false value)
+          false values)
   (print end))
+
+(defn- encode-map [value]
+  (print "{")
+  (reduce (fn [needs-space? k]
+            (when needs-space?
+              (print " "))
+            (encode-value k)
+            (print " ")
+            (encode-value (get value k))
+            true)
+          false (sort (keys value)))
+  (print "}"))
 
 (extend-protocol Encodable
   nil
@@ -31,6 +43,10 @@
     (encode-simple value))
 
   java.lang.String
+  (encode-value [value]
+    (encode-simple value))
+
+  clojure.lang.Keyword
   (encode-value [value]
     (encode-simple value))
 
@@ -56,7 +72,15 @@
 
   clojure.lang.PersistentList
   (encode-value [value]
-    (encode-sequence value "(" ")")))
+    (encode-sequence value "(" ")"))
+
+  clojure.lang.PersistentHashSet
+  (encode-value [value]
+    (encode-sequence (sort value) "#{" "}"))
+
+  clojure.lang.PersistentArrayMap
+  (encode-value [value]
+    (encode-map value)))
 
 (defn encode [value]
   (with-out-str
