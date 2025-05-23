@@ -14,3 +14,9 @@
   (encode-value [value]
     (print "#token ")
     (pr (token-digest value))))
+
+(defmethod print-method Token [token writer]
+  (doto writer
+    (.write "#asphales/token \"")
+    (.write (token-digest token))
+    (.write "\"")))

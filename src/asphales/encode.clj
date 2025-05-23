@@ -1,5 +1,4 @@
-(ns asphales.encode
-  (:require [clojure.edn :as edn]))
+(ns asphales.encode)
 
 (defprotocol Encodable
   "Protocol for encoding values in normalized form for storage."
@@ -104,11 +103,3 @@
 (defn encode [value]
   (with-out-str
     (encode-value value)))
-
-(defn encode-binary [value]
-  (.getBytes (encode value) "UTF-8"))
-
-(defn decode-binary [bytes]
-  (edn/read-string ;{:readers {'token token}}
-                   (String. bytes "UTF-8")))
-
