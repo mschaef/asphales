@@ -1,7 +1,7 @@
 (ns asphales.token
   (:require [asphales.encode :as encode]))
 
-(deftype Token [digest])
+(defrecord Token [digest])
 
 (defn token [digest]
   (Token. digest))

@@ -3,7 +3,7 @@
             [asphales.token :as token]))
 
 
-(deftype MemoryStorage [store]
+(deftype MemoryStorage [root store]
   storage/Storage
 
   (put-data [self data]
@@ -14,7 +14,13 @@
 
   (get-data [self data-token]
     (when-let [bytes (get @store (token/token-digest data-token))]
-      (storage/decode-binary bytes))))
+      (storage/decode-binary bytes)))
+
+  (get-root [self]
+    @root)
+
+  (update-root [self current-root new-root]
+    (compare-and-set! root current-root new-root)))
 
 (defn memory-storage []
-  (MemoryStorage. (atom {})))
+  (MemoryStorage. (atom nil) (atom {})))

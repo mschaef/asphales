@@ -16,4 +16,7 @@
 
 (defprotocol Storage
   (put-data [self data])
-  (get-data [self hash]))
+  (get-data [self hash])
+
+  (get-root [self])
+  (update-root [self current-root new-root]))
