@@ -15,8 +15,21 @@
   (digest/sha256 bytes))
 
 (defprotocol Storage
-  (put-data [self data])
-  (get-data [self hash])
+  (-put-bytes [self data])
+  (-get-bytes [self tok])
 
   (get-root [self])
   (update-root [self current-root new-root]))
+
+(defn put-bytes [store data]
+  (-put-bytes store data))
+
+(defn get-bytes [store tok]
+  (-get-bytes store tok))
+
+(defn put-edn [store edn]
+  (-put-bytes store (encode-binary edn)))
+
+(defn get-edn [store tok]
+  (when-let [bytes (-get-bytes store tok)]
+    (decode-binary bytes)))

@@ -6,15 +6,13 @@
 (deftype MemoryStorage [root store]
   storage/Storage
 
-  (put-data [self data]
-    (let [encoded (storage/encode-binary data)
-          data-digest (storage/digest encoded)]
-      (swap! store assoc data-digest encoded)
+  (-put-bytes [self data]
+    (let [data-digest (storage/digest data)]
+      (swap! store assoc data-digest data)
       (token/token data-digest)))
 
-  (get-data [self data-token]
-    (when-let [bytes (get @store (token/token-digest data-token))]
-      (storage/decode-binary bytes)))
+  (-get-bytes [self tok]
+    (get @store (token/token-digest tok)))
 
   (get-root [self]
     @root)
