@@ -1,7 +1,12 @@
 (ns asphales.token
   (:require [asphales.encode :as encode]))
 
-(defrecord Token [digest])
+(defrecord Token [digest]
+  java.lang.Comparable
+  (compareTo [this o]
+    (if (identical? this o)
+      0
+      (.compareTo (.digest this) (.digest o)))))
 
 (defn token [digest]
   (Token. digest))
