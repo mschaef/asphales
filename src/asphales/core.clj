@@ -34,7 +34,8 @@
   `(call-with-transaction ~store (fn [] ~@body)))
 
 (defn assert-state! [body]
-  (let [tok (storage/put-edn *tx-store* {:body body})]
+  (let [tok (storage/put-edn *tx-store* {:body body
+                                         :salt (random-uuid)})]
     (swap! *tx-state*
            (fn [state tok]
              (update-in state [:active-states] conj tok))
@@ -81,6 +82,7 @@
     (with-transaction s
       (mint-coins 100 "bob"))
     (with-transaction s
+      (mint-coins 100 "alice")
       (mint-coins 100 "charlie"))
     (show-transactions s))
   (println "end run."))
