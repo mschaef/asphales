@@ -1,4 +1,4 @@
-(ns asphales.transactions
+(ns asphales.transaction-store
   (:use asphales.util)
   (:require [asphales.storage :as storage]
             [asphales.memory-storage :as memory-storage]))
