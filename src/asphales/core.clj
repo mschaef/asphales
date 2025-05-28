@@ -43,12 +43,12 @@
     tok))
 
 (defn retract-state! [tok]
-  (if (get-in *tx-state* [:active-states tok])
+  (if (get-in @*tx-state* [:active-states tok])
     (swap! *tx-state*
            (fn [state tok]
              (update-in state [:active-states] disj tok))
            tok)
-    (fail "State not active: " tok)))
+    (fail "State not active (cannot be retracted): " tok)))
 
 (defn transaction-seq
   ([store ]
@@ -70,19 +70,57 @@
       (println "   " (:body s)))
     (println)))
 
-(defn mint-coins [amount owner]
+(defn mint-coin! [amount owner]
   (assert-state! {:amount amount :owner owner}))
+
+(defn active-coins
+  ([]
+   (active-states *tx-store* @*tx-state*))
+
+  ([owner]
+   (filter #(= owner (:owner (:body %))) (active-coins))))
+
+(defn fetch-state [tok]
+  (if (get-in @*tx-state* [:active-states tok])
+    (storage/get-edn *tx-store* tok)
+    (fail "State not active (cannot be fetched): " tok)))
+
+(defn merge-coins! [toks]
+  (when (> (count toks) 0)
+    (let [all-coins (map fetch-state toks)
+          owners (set (map #(:owner (:body %)) all-coins))]
+      (when (> (count owners) 1)
+        (fail "Cannot merge coins from muliple owners: " owners))
+      (doseq [tok toks]
+        (retract-state! tok))
+      (mint-coin! (apply + (map #(:amount (:body %)) all-coins))
+                  (first owners)))))
+
+(defn split-coin! [tok split-amount]
+  (let [coin (fetch-state tok)
+        owner (:owner (:body coin))
+        total-amount (:amount (:body coin))]
+    (when (> split-amount total-amount)
+      (fail "Cannot split more coin (" split-amount ") than available: " total-amount))
+    (retract-state! tok)
+
+    (mint-coin! split-amount owner)
+    (mint-coin! (- total-amount split-amount) owner)))
 
 (defn -main
   "I don't do a whole lot."
   []
   (let [s (init-transaction-store)]
     (with-transaction s
-      (mint-coins 100 "alice"))
+      (mint-coin! 100 "alice"))
     (with-transaction s
-      (mint-coins 100 "bob"))
+      (mint-coin! 100 "bob"))
     (with-transaction s
-      (mint-coins 100 "alice")
-      (mint-coins 100 "charlie"))
+      (mint-coin! 100 "alice")
+      (mint-coin! 100 "charlie"))
+    (with-transaction s
+      (merge-coins! (map :id (active-coins "alice"))))
+    (with-transaction s
+      (split-coin! (:id (first (active-coins "charlie"))) 12))
     (show-transactions s))
   (println "end run."))
