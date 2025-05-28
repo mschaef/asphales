@@ -58,7 +58,11 @@
 
   (testing "Encode date values"
     (is (= "#inst \"2022-02-14T11:20:00.123-00:00\""
-           (encode #inst "2022-02-14T11:20:00.123-00:00")))))
+           (encode #inst "2022-02-14T11:20:00.123-00:00"))))
+
+  (testing "Encode UUID"
+      (is (str "#uuid \"5eb878af-0050-4bbb-b433-39d494b408f3\"")
+          (encode #uuid "5eb878af-0050-4bbb-b433-39d494b408f3"))))
 
 (deftest sequence-encoding
   (testing "Encode Vectors"
@@ -96,6 +100,14 @@
            (encode #{(token/token "token-3")
                      (token/token "token-2")
                      (token/token "token-1")}))))
+
+  (testing "Encode sets of UUIDs"
+    (is (= "#{#uuid \"32a20cc0-63a7-4c47-b716-2060825c253e\"}"
+           (encode #{#uuid "32a20cc0-63a7-4c47-b716-2060825c253e"})))
+    (is (= "#{#uuid \"2c2fa537-6300-4e2e-98fd-95729a1febbe\" #uuid \"32a20cc0-63a7-4c47-b716-2060825c253e\" #uuid \"4573b6b1-f39b-490f-be97-92b018581886\"}"
+           (encode #{#uuid "32a20cc0-63a7-4c47-b716-2060825c253e"
+                     #uuid "4573b6b1-f39b-490f-be97-92b018581886"
+                     #uuid "2c2fa537-6300-4e2e-98fd-95729a1febbe"}))))
 
   (testing "Encode Maps"
     (is (= "{}" (encode {})))

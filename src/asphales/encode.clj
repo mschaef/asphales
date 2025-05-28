@@ -80,6 +80,10 @@
   (encode-value [value]
     (pr value))
 
+  java.util.UUID
+  (encode-value [value]
+    (pr value))
+
   clojure.lang.PersistentVector
   (encode-value [value]
     (encode-sequence value "[" "]"))
