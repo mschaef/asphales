@@ -58,13 +58,16 @@
      (let [transaction (storage/get-edn store tok)]
        (cons (assoc transaction :token tok) (lazy-seq (transaction-seq store (:previous transaction))))))))
 
+(defn active-states [store txn]
+  (map #(assoc (storage/get-edn store %) :id %)
+       (:active-states txn)))
+
 (defn show-transactions [ store ]
   (doseq [txn (transaction-seq store)]
     (println (:token txn))
-    (doseq [s (:active-states txn)]
-      (println "   " (storage/get-edn store s)))
+    (doseq [s (active-states store txn)]
+      (println "   " (:body s)))
     (println)))
-
 
 (defn mint-coins [amount owner]
   (assert-state! {:amount amount :owner owner}))
