@@ -107,6 +107,11 @@
     (mint-coin! split-amount owner)
     (mint-coin! (- total-amount split-amount) owner)))
 
+(defn transfer-coin! [tok new-owner]
+  (let [coin (fetch-state tok)]
+    (retract-state! tok)
+    (mint-coin! (:amount (:body coin)) new-owner)))
+
 (defn -main
   "I don't do a whole lot."
   []
@@ -122,5 +127,7 @@
       (merge-coins! (map :id (active-coins "alice"))))
     (with-transaction s
       (split-coin! (:id (first (active-coins "charlie"))) 12))
+    (with-transaction s
+      (transfer-coin! (:id (first (active-coins "bob"))) "david"))
     (show-transactions s))
   (println "end run."))
