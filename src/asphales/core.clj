@@ -6,7 +6,7 @@
   (throw (RuntimeException. (apply str args))))
 
 (defn genesis []
-  {:active #{}
+  {:active-states #{}
    :previous nil})
 
 (defn init-transaction-store []
@@ -33,24 +33,21 @@
 (defmacro with-transaction [store & body]
   `(call-with-transaction ~store (fn [] ~@body)))
 
-(defn add-assertion [state tok]
-  (update-in state [:active] conj tok))
-
-(defn retract-assertion [state tok]
-  (update-in state [:active] disj tok))
-
-(defn assert! [body]
+(defn assert-state! [body]
   (let [tok (storage/put-edn *tx-store* {:body body})]
-    (swap! *tx-state* add-assertion tok)
+    (swap! *tx-state*
+           (fn [state tok]
+             (update-in state [:active-states] conj tok))
+           tok)
     tok))
 
-(defn retract! [tok]
-  (if (get-in *tx-state* [:active tok])
-    (swap! *tx-state* retract-assertion tok)
-    (fail "Assertion not active: " tok)))
-
-(defn mint-coins [amount owner]
-  (assert! {:amount amount :owner owner}))
+(defn retract-state! [tok]
+  (if (get-in *tx-state* [:active-states tok])
+    (swap! *tx-state*
+           (fn [state tok]
+             (update-in state [:active-states] disj tok))
+           tok)
+    (fail "State not active: " tok)))
 
 (defn transaction-seq
   ([store ]
@@ -64,9 +61,13 @@
 (defn show-transactions [ store ]
   (doseq [txn (transaction-seq store)]
     (println (:token txn))
-    (doseq [c (:active txn)]
-      (println "   " (storage/get-edn store c)))
+    (doseq [s (:active-states txn)]
+      (println "   " (storage/get-edn store s)))
     (println)))
+
+
+(defn mint-coins [amount owner]
+  (assert-state! {:amount amount :owner owner}))
 
 (defn -main
   "I don't do a whole lot."
