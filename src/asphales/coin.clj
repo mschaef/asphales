@@ -31,8 +31,8 @@
       (fail "Cannot split more coin (" split-amount ") than available: " total-amount))
     (txs/retract-state! tok)
 
-    (mint-coin! split-amount owner)
-    (mint-coin! (- total-amount split-amount) owner)))
+    (mint-coin! (- total-amount split-amount) owner)
+    (mint-coin! split-amount owner)))
 
 (defn transfer-coin! [tok new-owner]
   (let [coin (txs/fetch-state tok)]
