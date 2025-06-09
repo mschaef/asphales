@@ -3,13 +3,13 @@
   (:require [asphales.storage :as storage]
             [asphales.memory-storage :as memory-storage]))
 
-(defn genesis []
+(defn- genesis-transaction []
   {:active-states #{}
    :previous nil})
 
 (defn init-transaction-store []
   (let [store (memory-storage/memory-storage)
-        genesis-tok (storage/put-edn store (genesis))]
+        genesis-tok (storage/put-edn store (genesis-transaction))]
     (storage/update-root store nil genesis-tok)
     store))
 
