@@ -57,9 +57,17 @@
      (let [transaction (storage/get-edn store tok)]
        (cons (assoc transaction :token tok) (lazy-seq (transaction-seq store (:previous transaction))))))))
 
+(defn fetch-state [tok]
+  (if (get-in @*tx-state* [:active-states tok])
+    (storage/get-edn *tx-store* tok)
+    (fail "State not active (cannot be fetched): " tok)))
+
+(defn active-state-ids []
+  (:active-states @*tx-state*))
+
 (defn active-states []
-  (map #(assoc (storage/get-edn *tx-store* %) :id %)
-       (:active-states @*tx-state*)))
+  (map #(assoc (fetch-state %) :id %)
+       (active-state-ids)))
 
 (defn show-transactions []
   (doseq [txn (transaction-seq *tx-store*)]
@@ -67,8 +75,3 @@
     (doseq [s (active-states)]
       (println "   " (:body s)))
     (println)))
-
-(defn fetch-state [tok]
-  (if (get-in @*tx-state* [:active-states tok])
-    (storage/get-edn *tx-store* tok)
-    (fail "State not active (cannot be fetched): " tok)))
