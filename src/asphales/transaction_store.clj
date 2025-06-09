@@ -41,12 +41,12 @@
     tok))
 
 (defn retract-state! [tok]
-  (if (get-in @*tx-state* [:active-states tok])
-    (swap! *tx-state*
-           (fn [state tok]
-             (update-in state [:active-states] disj tok))
-           tok)
-    (fail "State not active (cannot be retracted): " tok)))
+  (swap! *tx-state*
+         (fn [state tok]
+           (when (not (get-in @*tx-state* [:active-states tok]))
+             (fail "State not active (cannot be retracted): " tok))
+           (update-in state [:active-states] disj tok))
+         tok))
 
 (defn transaction-seq
   ([store ]
