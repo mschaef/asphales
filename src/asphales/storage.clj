@@ -18,8 +18,8 @@
   (-put-bytes [self data])
   (-get-bytes [self tok])
 
-  (get-root [self])
-  (update-root [self current-root new-root]))
+  (-get-root [self])
+  (-update-root [self current-root new-root]))
 
 (defn put-bytes [store data]
   (-put-bytes store data))
@@ -33,3 +33,9 @@
 (defn get-edn [store tok]
   (when-let [bytes (-get-bytes store tok)]
     (decode-binary bytes)))
+
+(defn get-root [store]
+  (-get-root store))
+
+(defn update-root [store current-root new-root]
+  (-update-root store current-root new-root))

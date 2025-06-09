@@ -16,6 +16,11 @@
 (def ^:dynamic *tx-store* nil)
 (def ^:dynamic *tx-state* nil)
 
+(defn- current-tx-state []
+  (if-let [state *tx-state*]
+    @state
+    (fail "No current transaction.")))
+
 (defn call-with-transaction [store tx-fn]
   (when *tx-store*
     (fail "Transactions cannot be nested." *tx-store*))
@@ -32,6 +37,7 @@
   `(call-with-transaction ~store (fn [] ~@body)))
 
 (defn assert-state! [body]
+  (current-tx-state)
   (let [tok (storage/put-edn *tx-store* {:body body
                                          :salt (random-uuid)})]
     (swap! *tx-state*
@@ -41,15 +47,16 @@
     tok))
 
 (defn retract-state! [tok]
+  (current-tx-state)
   (swap! *tx-state*
          (fn [state tok]
-           (when (not (get-in @*tx-state* [:active-states tok]))
+           (when (not (get-in state [:active-states tok]))
              (fail "State not active (cannot be retracted): " tok))
            (update-in state [:active-states] disj tok))
          tok))
 
 (defn transaction-seq
-  ([store ]
+  ([store]
    (transaction-seq store (storage/get-root store)))
 
   ([store tok]
@@ -58,12 +65,12 @@
        (cons (assoc transaction :token tok) (lazy-seq (transaction-seq store (:previous transaction))))))))
 
 (defn fetch-state [tok]
-  (if (get-in @*tx-state* [:active-states tok])
+  (if (get-in (current-tx-state) [:active-states tok])
     (storage/get-edn *tx-store* tok)
     (fail "State not active (cannot be fetched): " tok)))
 
 (defn active-state-ids []
-  (:active-states @*tx-state*))
+  (:active-states (current-tx-state)))
 
 (defn active-states []
   (map #(assoc (fetch-state %) :id %)

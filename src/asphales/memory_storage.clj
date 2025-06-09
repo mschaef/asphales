@@ -14,10 +14,10 @@
   (-get-bytes [self tok]
     (get @store (token/token-digest tok)))
 
-  (get-root [self]
+  (-get-root [self]
     @root)
 
-  (update-root [self current-root new-root]
+  (-update-root [self current-root new-root]
     (compare-and-set! root current-root new-root)))
 
 (defn memory-storage []

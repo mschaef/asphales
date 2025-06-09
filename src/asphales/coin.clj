@@ -12,7 +12,7 @@
   ([owner]
    (filter #(= owner (:owner (:body %))) (active-coins))))
 
-(defn merge-coins! [toks]
+ (defn merge-coins! [toks]
   (when (> (count toks) 0)
     (let [all-coins (map txs/fetch-state toks)
           owners (set (map #(:owner (:body %)) all-coins))]
